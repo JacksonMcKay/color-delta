@@ -1,6 +1,7 @@
 import { Input } from '@chakra-ui/react';
-import { formatCss, formatHex, parse } from 'culori/fn';
+import { Color, formatCss, formatHex, formatHex8, parse } from 'culori';
 import { ChangeEvent, useState } from 'react';
+import { ColorChip } from '../components/ColorChip';
 
 export default function Home() {
   const [inputColor, setInputColor] = useState('');
@@ -14,13 +15,11 @@ export default function Home() {
 
   const inputInvalid = parsedInputColor === undefined && inputColor !== '';
 
-  const formattedInputColor =
-    parsedInputColor?.mode === 'rgb' && parsedInputColor.alpha === undefined
-      ? formatHex(parsedInputColor)
-      : formatCss(parsedInputColor);
+  const formattedInputColor = formatColor(parsedInputColor);
 
   return (
     <main>
+      <ColorChip color={parsedInputColor}></ColorChip>
       <Input
         isInvalid={inputInvalid}
         value={inputColor}
@@ -29,4 +28,11 @@ export default function Home() {
       {formattedInputColor}
     </main>
   );
+}
+
+function formatColor(input: Color | undefined) {
+  if (input?.mode === 'rgb') {
+    return input.alpha === undefined ? formatHex(input) : formatHex8(input);
+  }
+  return formatCss(input);
 }
