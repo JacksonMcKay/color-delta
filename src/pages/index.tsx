@@ -19,7 +19,7 @@ export default function Home() {
 
   return (
     <main>
-      <ColorChip color={parsedInputColor}></ColorChip>
+      <ColorChip color={formattedInputColor}></ColorChip>
       <Input
         isInvalid={inputInvalid}
         value={inputColor}
