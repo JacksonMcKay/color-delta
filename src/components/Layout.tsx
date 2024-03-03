@@ -15,7 +15,7 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <>
       <SkipNavLink>Skip to content</SkipNavLink>
-      <header className="flex justify-center mx-[-1rem] mt-[-1rem] pt-4 pb-4 mb-6 shadow dark:shadow-gray-700">
+      <header className="mb-6 flex justify-center pb-4 pt-4">
         <Heading as="h1" className="text-center">
           Color Delta &Delta;
         </Heading>
@@ -26,7 +26,7 @@ export function Layout({ children }: { children: ReactNode }) {
           style={{ position: 'absolute', right: '1rem' }}
         />
       </header>
-      <main>
+      <main className="ml-auto mr-auto max-w-screen-lg">
         <SkipNavContent />
         {children}
       </main>
