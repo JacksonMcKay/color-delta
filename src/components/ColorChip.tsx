@@ -3,13 +3,21 @@ import styles from './ColorChip.module.scss';
 
 const oklchConverter = converter('oklch');
 
-export function ColorChip({ color }: { color?: string }) {
+export function ColorChip({
+  color,
+  aside,
+}: {
+  color?: string;
+  aside?: boolean;
+}) {
   const oklch =
     oklchConverter(parse(color ?? '')) ?? converter('oklch')('#ffffff')!;
   const borderColor = calculateBorderColor(oklch);
   return (
     <div
-      className={`relative m-0.5 min-h-[20px] w-[64px] min-w-[20px] ${styles.chip}`}
+      className={`relative m-0.5 min-h-[20px] w-[64px] min-w-[20px] ${styles.chip} ${
+        aside ? 'mr-4' : aside === false ? 'ml-4' : ''
+      }`}
       style={{ backgroundColor: color, borderColor, borderWidth: '2px' }}
     ></div>
   );

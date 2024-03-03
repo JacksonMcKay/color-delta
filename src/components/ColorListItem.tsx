@@ -20,7 +20,7 @@ export function ColorListItem({
   return (
     <div className="flex gap-2 font-mono">
       {formatNumber(diff, { minLength: 6 })}
-      <ColorChip color={formattedColor} />
+      <ColorChip color={formattedColor} aside={(luminanceDiff ?? 0) > 0} />
       {formattedColor} {displayedLuminanceDiff}
     </div>
   );
