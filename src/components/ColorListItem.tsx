@@ -19,7 +19,7 @@ export function ColorListItem({
     );
   return (
     <div className="flex gap-2 font-mono">
-      {formatNumber(diff, { padding: 6 })}
+      {formatNumber(diff, { minLength: 6 })}
       <ColorChip color={formattedColor} />
       {formattedColor} {displayedLuminanceDiff}
     </div>
@@ -28,9 +28,9 @@ export function ColorListItem({
 
 function formatNumber(
   input: number | undefined,
-  options?: { explicitSignage?: boolean; padding?: number; prefix?: string },
+  options?: { explicitSignage?: boolean; minLength?: number; prefix?: string },
 ) {
-  const actualPadding = options?.padding ? options.padding : 5;
+  const actualPadding = options?.minLength ? options.minLength : 5;
   if (input === undefined) {
     return ''.padStart(actualPadding, '\xa0');
   }
