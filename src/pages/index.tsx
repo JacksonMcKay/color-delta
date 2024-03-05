@@ -9,7 +9,7 @@ import {
   formatHex8,
   parse,
 } from 'culori';
-import { ChangeEvent, ReactElement, useState } from 'react';
+import { ChangeEvent, ReactElement, useEffect, useState } from 'react';
 import { ColorChip } from '../components/ColorChip';
 import { ColorListItem } from '../components/ColorListItem';
 
@@ -72,9 +72,15 @@ export default function Home() {
   const [palette, setPalette] = useState<PaletteColor[]>(
     examplePalette.map(stringToPaletteColor),
   );
+
   const [paletteInput, setPaletteInput] = useState<string>(
     JSON.stringify(examplePalette),
   );
+
+  useEffect(() => {
+    const localPalette = localStorage.getItem('palette_scratchpad');
+    localPalette && setPaletteInput(localPalette);
+  }, [palette]);
 
   function handleInputColorChange(event: ChangeEvent<HTMLInputElement>) {
     const value = event?.target?.value;
@@ -87,7 +93,11 @@ export default function Home() {
     try {
       let parsedInputPalette = JSON.parse(value);
       if (parsedInputPalette) {
-        setPalette(parsedInputPalette.map(stringToPaletteColor));
+        const newPalette = (parsedInputPalette as string[]).map(
+          stringToPaletteColor,
+        );
+        localStorage.setItem('palette_scratchpad', value);
+        setPalette(newPalette);
       }
     } catch {
       // silently fail - wait for next valid input
