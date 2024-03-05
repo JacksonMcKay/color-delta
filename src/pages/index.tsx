@@ -1,4 +1,4 @@
-import { Input, Textarea } from '@chakra-ui/react';
+import { Input, Select, Textarea } from '@chakra-ui/react';
 import {
   Color,
   Oklch,
@@ -12,6 +12,8 @@ import {
 import { ChangeEvent, ReactElement, useEffect, useState } from 'react';
 import { ColorChip } from '../components/ColorChip';
 import { ColorListItem } from '../components/ColorListItem';
+import { SwitchPaletteDialog } from '../components/SwitchPaletteDialog';
+import { examplePalette, uswdsPalette } from '../utils/palettes';
 
 const oklchConverter = converter('oklch');
 const colorDelta = differenceCiede2000();
@@ -35,38 +37,6 @@ interface PaletteColor {
   oklch: Oklch;
 }
 
-const examplePalette = [
-  '#000000',
-  '#ffffff',
-  '#663399',
-  '#ff0000',
-  '#fcfcfc',
-  '#f9f9f9',
-  '#f6f6f6',
-  '#f3f3f3',
-  '#f0f0f0',
-  '#e6e6e6',
-  '#c9c9c9',
-  '#adadad',
-  '#919191',
-  '#757575',
-  '#5c5c5c',
-  '#454545',
-  '#2e2e2e',
-  '#1b1b1b',
-  '#fef2ff',
-  '#fbdcff',
-  '#f4b2ff',
-  '#ee83ff',
-  '#d85bef',
-  '#be32d0',
-  '#93348c',
-  '#711e6c',
-  '#481441',
-  '#1b151b',
-  '#382936',
-];
-
 export default function Home() {
   const [inputColor, setInputColor] = useState('');
   const [palette, setPalette] = useState<PaletteColor[]>(
@@ -77,9 +47,19 @@ export default function Home() {
     JSON.stringify(examplePalette),
   );
 
+  const [currentPalette, setCurrentPalette] = useState('example');
+
+  const [switchPaletteDialog, setSwitchPaletteDialog] = useState<
+    string | undefined
+  >();
+
   useEffect(() => {
     const localPalette = localStorage.getItem('palette_scratchpad');
-    localPalette && setPaletteInput(localPalette);
+    if (localPalette && paletteInput !== localPalette) {
+      setCurrentPalette('scratchpad');
+      setPaletteInput(localPalette);
+      setPalette(JSON.parse(localPalette).map(stringToPaletteColor));
+    }
     const localInputColor = localStorage.getItem('input_color');
     localInputColor && setInputColor(localInputColor);
   }, [palette]);
@@ -101,13 +81,12 @@ export default function Home() {
 
   function handlePaletteChange(event: ChangeEvent<HTMLTextAreaElement>) {
     const value = event?.target?.value;
+    setCurrentPalette('scratchpad');
     setPaletteInput(value);
     try {
       let parsedInputPalette = JSON.parse(value);
       if (parsedInputPalette) {
-        const newPalette = (parsedInputPalette as string[]).map(
-          stringToPaletteColor,
-        );
+        const newPalette = dedup(parsedInputPalette).map(stringToPaletteColor);
         localStorage.setItem('palette_scratchpad', value);
         setPalette(newPalette);
       }
@@ -116,6 +95,44 @@ export default function Home() {
     }
   }
 
+  function handlePickPalette(event: ChangeEvent<HTMLSelectElement>) {
+    const value = event.target.value;
+    if (value !== 'scratchpad') {
+      if (currentPalette === 'scratchpad' && paletteNotDefault(paletteInput)) {
+        setSwitchPaletteDialog(value);
+      } else {
+        // note: might need to rethink this with custom palettes (unsaved changes)
+        switchPalettes(value);
+      }
+    } else {
+      setCurrentPalette('scratchpad');
+    }
+  }
+
+  function handleCloseDialog(destructive: boolean) {
+    if (destructive) {
+      // ! because the dialog is only open if switchPaletteDialog isn't undefined
+      switchPalettes(switchPaletteDialog!);
+    }
+    setSwitchPaletteDialog(undefined);
+  }
+
+  function switchPalettes(destination: string) {
+    switch (destination) {
+      case 'uswds':
+        localStorage.removeItem('palette_scratchpad');
+        setPaletteInput(JSON.stringify(uswdsPalette));
+        setPalette(dedup(uswdsPalette).map(stringToPaletteColor));
+        setCurrentPalette('uswds');
+        break;
+      case 'example':
+        localStorage.removeItem('palette_scratchpad');
+        setPaletteInput(JSON.stringify(examplePalette));
+        setPalette(dedup(examplePalette).map(stringToPaletteColor));
+        setCurrentPalette('example');
+        break;
+    }
+  }
   const parsedInputColor = parse(inputColor);
   const inputInvalid = parsedInputColor === undefined && inputColor !== '';
   const formattedInputColor = formatColor(parsedInputColor);
@@ -157,11 +174,22 @@ export default function Home() {
         </div>
         {colorListItems}
       </div>
-      <aside className="flex grow flex-col items-start font-mono">
-        <Textarea
-          value={paletteInput}
-          onChange={handlePaletteChange}
-          minH={'12rem'}
+      <aside className="flex grow flex-col items-start gap-3">
+        <Select onChange={handlePickPalette} value={currentPalette}>
+          <option value="scratchpad">Scratchpad</option>
+          <option value="example">Default example</option>
+          <option value="uswds">USWDS colors</option>
+        </Select>
+        <div className="contents font-mono">
+          <Textarea
+            value={paletteInput}
+            onChange={handlePaletteChange}
+            minH={'12rem'}
+          />
+        </div>
+        <SwitchPaletteDialog
+          isOpen={!!switchPaletteDialog}
+          onClose={handleCloseDialog}
         />
       </aside>
     </main>
@@ -175,4 +203,17 @@ function formatColor(input: string | Color | undefined) {
     return color.alpha === undefined ? formatHex(color) : formatHex8(color);
   }
   return formatCss(color);
+}
+
+/** Eliminates duplicate entries from an array of strings */
+function dedup(input: string[]): string[] {
+  return [...new Set(input)];
+}
+
+/** Returns false if the palette matches one of the default palettes */
+function paletteNotDefault(currentPalette: string): boolean {
+  return ![
+    JSON.stringify(uswdsPalette),
+    JSON.stringify(examplePalette),
+  ].includes(currentPalette);
 }
