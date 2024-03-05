@@ -80,10 +80,22 @@ export default function Home() {
   useEffect(() => {
     const localPalette = localStorage.getItem('palette_scratchpad');
     localPalette && setPaletteInput(localPalette);
+    const localInputColor = localStorage.getItem('input_color');
+    localInputColor && setInputColor(localInputColor);
   }, [palette]);
 
   function handleInputColorChange(event: ChangeEvent<HTMLInputElement>) {
     const value = event?.target?.value;
+    try {
+      // this will throw if unsuccessful
+      stringToPaletteColor(value);
+      localStorage.setItem('input_color', value);
+    } catch {
+      // skip writing to local storage if color is invalid (unless empty)
+    }
+    if (value === '') {
+      localStorage.setItem('input_color', value);
+    }
     setInputColor(value);
   }
 
