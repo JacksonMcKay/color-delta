@@ -58,7 +58,7 @@ export default function Home() {
     if (localPalette && paletteInput !== localPalette) {
       setCurrentPalette('scratchpad');
       setPaletteInput(localPalette);
-      setPalette(JSON.parse(localPalette).map(stringToPaletteColor));
+      setPalette(dedup(JSON.parse(localPalette)).map(stringToPaletteColor));
     }
     const localInputColor = localStorage.getItem('input_color');
     localInputColor && setInputColor(localInputColor);
