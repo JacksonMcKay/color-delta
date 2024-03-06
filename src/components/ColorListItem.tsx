@@ -1,10 +1,12 @@
 import { ColorChip } from './ColorChip';
 
 export function ColorListItem({
+  raw,
   formattedColor,
   diff,
   luminanceDiff,
 }: {
+  raw: string;
   formattedColor: string;
   diff?: number;
   luminanceDiff?: number;
@@ -18,10 +20,11 @@ export function ColorListItem({
       </span>
     );
   return (
-    <div className="flex gap-2 font-mono">
-      {formatNumber(diff, { minLength: 6 })}
-      <ColorChip color={formattedColor} aside={(luminanceDiff ?? 0) > 0} />
-      {formattedColor} {displayedLuminanceDiff}
+    <div className="contents font-mono">
+      <div>{formatNumber(diff, { minLength: 6 })}</div>
+      <ColorChip color={formattedColor} />
+      <div>{raw}</div>
+      <div className="">{displayedLuminanceDiff}</div>
     </div>
   );
 }

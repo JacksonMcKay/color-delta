@@ -14,6 +14,7 @@ import { ColorChip } from '../components/ColorChip';
 import { ColorListItem } from '../components/ColorListItem';
 import { SwitchPaletteDialog } from '../components/SwitchPaletteDialog';
 import { examplePalette, uswdsPalette } from '../utils/palettes';
+import styles from './index.module.scss';
 
 const oklchConverter = converter('oklch');
 const colorDelta = differenceCiede2000();
@@ -172,7 +173,27 @@ export default function Home() {
             onChange={handleInputColorChange}
           />
         </div>
-        {colorListItems}
+        <div className={`relative pt-3 ${styles['color-grid']}`}>
+          <div className="justify-self-end font-semibold">
+            {parsedInputColor !== undefined && (
+              // padded with non-breaking spaces to align with the decimal point. Kinda crazy but it works
+              <>
+                &Delta;
+                <span className="font-mono font-normal">&nbsp;&nbsp;</span>
+              </>
+            )}
+          </div>
+          <div
+            className={`justify-self-center font-semibold ${styles['color-header']}`}
+          >
+            Color
+          </div>
+          <div className="justify-self-center font-semibold">
+            {parsedInputColor !== undefined && <>&Delta;Luminance</>}
+          </div>
+          <div className={styles['header-separator']}></div>
+          {colorListItems}
+        </div>
       </div>
       <aside className="flex grow flex-col items-start gap-3">
         <Select onChange={handlePickPalette} value={currentPalette}>

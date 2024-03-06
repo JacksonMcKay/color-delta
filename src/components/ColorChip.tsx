@@ -15,9 +15,7 @@ export function ColorChip({
   const borderColor = calculateBorderColor(oklch);
   return (
     <div
-      className={`relative m-0.5 min-h-[20px] w-[64px] min-w-[20px] ${styles.chip} ${
-        aside ? 'mr-4' : aside === false ? 'ml-4' : ''
-      }`}
+      className={`relative m-0.5 min-h-[20px] w-[64px] min-w-[20px] ${styles.chip}`}
       style={{ backgroundColor: color, borderColor, borderWidth: '2px' }}
     ></div>
   );
